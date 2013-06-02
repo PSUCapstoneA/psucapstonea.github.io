@@ -1,0 +1,55 @@
+<html>
+<head>
+  <title>Firebase Messaging Test Interface</title>
+  <script src='https://cdn.firebase.com/v0/firebase.js'></script>
+  <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.2/jquery.min.js'></script>
+  <STYLE type="text/css">
+    ul { list-style: none; }
+    li { border-bottom: 1px solid black; margin: 5px;padding: 5px }
+  </STYLE>
+</head>
+
+<body>
+  <div id="messageWrapper">
+    <ul id="messageList"></ul>
+  </div>
+  <input type='text' id='messageInput' placeholder='Message'></input>
+  <div id="break"></div>
+  <input type='text' id='firebaseSource' placeholder='Firebase URL'></input>
+  <script>
+    var ENTER_KEY = 13;
+    var messageRef = new Firebase('https://pdxcapstonea.firebaseio.com/messages');
+    setupListener('on', messageRef);
+    $('#messageInput').on('keypress', function (e) {
+      if (e.keyCode == ENTER_KEY) {
+        var text = $('#messageInput').val();
+        messageRef.push({text: text});
+        $('#messageInput').val('');
+      }
+    });
+    $('#firebaseSource').on('keypress', function(e) {
+      if (e.keyCode == ENTER_KEY) {
+        setupListener('off', messageRef);
+        var source = $('#firebaseSource').val();
+        messageRef = new Firebase(source);
+        $('#firebaseSource').val();
+        setupListener('on', messageRef);
+      }
+    });
+    function setupListener(state, reference) {
+      $('#mesageList').html('');
+      reference[state]('child_added', function(snapshot) {
+        var message = snapshot.val();
+        displayChatMessage(message.text);
+      });
+    }
+    function displayChatMessage(text) {
+      $('<li/>').text(text).prepend($('<em/>')).appendTo($('#messageList'));
+      $('#messageList')[0].scrollTop = $('#messageList')[0].scrollHeight;
+    };
+  </script>
+</body>
+</html>
+
+
+
